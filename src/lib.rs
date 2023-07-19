@@ -30,21 +30,26 @@ pub fn configure(config: Config) -> (UdpSocket, [u8; 65535]) {
 
 pub fn consume(socket: &mut UdpSocket, buffer: &mut [u8]) {
     loop {
-        let mut maybe: Option<Polygon> = None;
+        let mut maybe: Option<String> = None;
         {
             let packets_queued = peek(socket, buffer);
+            println!("packets_queued {packets_queued}");
             if packets_queued > 0 {
                 maybe = match receive(socket, buffer) {
                     Ok(buf) => Some(buf),
                     Err(_) => None,
                 };
+
+                if let Some(data) = maybe {
+                    println!("data {data:?}");
+                }
             }
         }
     }
 }
 
 pub fn send(socket: &mut UdpSocket, destination: &SocketAddr, data: &Polygon) {
-    format!("data {data:?}");
+    println!("data {data:?}");
     socket
         .send_to(
             &data.msg.as_bytes(),
@@ -53,11 +58,12 @@ pub fn send(socket: &mut UdpSocket, destination: &SocketAddr, data: &Polygon) {
         .unwrap();
 }
 
-pub fn receive(socket: &mut UdpSocket, buffer: &mut [u8]) -> Result<Polygon, ()> {
-    Ok(Polygon {
-        id: 0,
-        msg: String::from("Hello"),
-    })
+pub fn receive(socket: &mut UdpSocket, buffer: &mut [u8]) -> Result<String, ()> {
+    let (amt, _src) = socket.recv_from(buffer).unwrap();
+    let slice = &mut buffer[..amt];
+    slice.to_vec();
+    let message = String::from_utf8_lossy(&slice);
+    Ok(message.to_string())
 }
 
 pub fn peek(socket: &mut UdpSocket, buffer: &mut [u8]) -> usize {
