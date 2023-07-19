@@ -5,13 +5,15 @@ use std::net::{IpAddr, Ipv4Addr};
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    pub address: Vec<(IpAddr, u16)>,
+    pub bind_addresses: Vec<(IpAddr, u16)>,
+    pub destination_address: (IpAddr, u16),
 }
 
 impl Default for Config {
     fn default() -> Self {
         Config {
-            address: vec![(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 5060)],
+            bind_addresses: vec![(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 5060)],
+            destination_address: (IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 1020),
         }
     }
 }
@@ -21,7 +23,7 @@ pub trait FromToml {
 }
 
 pub trait FromArguments {
-    fn from_arguments(addresses: Vec<(IpAddr, u16)>) -> Self;
+    fn from_arguments(local: Vec<(IpAddr, u16)>, remote: (IpAddr, u16)) -> Self;
 }
 
 pub trait FromDefault {
@@ -44,8 +46,11 @@ impl FromToml for Config {
 }
 
 impl FromArguments for Config {
-    fn from_arguments(addresses: Vec<(IpAddr, u16)>) -> Self {
-        Config { address: addresses }
+    fn from_arguments(local: Vec<(IpAddr, u16)>, remote: (IpAddr, u16)) -> Self {
+        Config {
+            bind_addresses: local,
+            destination_address: remote,
+        }
     }
 }
 
@@ -72,7 +77,8 @@ impl FromEnv for Config {
         };
 
         Config {
-            address: vec![(address, port)],
+            bind_addresses: vec![(address, port)],
+            destination_address: (address, port),
         }
     }
 }

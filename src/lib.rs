@@ -1,15 +1,16 @@
 use std::net::{IpAddr, SocketAddr, UdpSocket};
-mod config;
+pub mod config;
 use config::Config;
 
+#[derive(Debug)]
 pub struct Polygon {
-    id: u32,
-    msg: String,
+    pub id: u32,
+    pub msg: String,
 }
 
-pub fn configure(config: Config) {
+pub fn configure(config: Config) -> (UdpSocket, [u8; 65535]) {
     let addrs = config
-        .address
+        .bind_addresses
         .into_iter()
         .map(|addr| match addr.0 {
             IpAddr::V4(ipv4) => SocketAddr::new(IpAddr::V4(ipv4), addr.1),
@@ -17,10 +18,14 @@ pub fn configure(config: Config) {
         })
         .collect::<Vec<_>>();
 
+    // tokio::spawn(async move {
     let mut socket = UdpSocket::bind(&addrs[..]).unwrap();
     let mut buffer = [0_u8; 65535];
 
-    consume(&mut socket, &mut buffer);
+    //   consume(&mut socket, &mut buffer);
+    //});
+
+    (socket, buffer)
 }
 
 pub fn consume(socket: &mut UdpSocket, buffer: &mut [u8]) {
@@ -39,6 +44,7 @@ pub fn consume(socket: &mut UdpSocket, buffer: &mut [u8]) {
 }
 
 pub fn send(socket: &mut UdpSocket, destination: &SocketAddr, data: &Polygon) {
+    format!("data {data:?}");
     socket
         .send_to(
             &data.msg.as_bytes(),
