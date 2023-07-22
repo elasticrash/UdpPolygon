@@ -8,6 +8,7 @@ license = "MIT"
 keywords = ["udp", "datagram"]
 repository = "https://github.com/elasticrash/udp_polygon"
 authors = ["stefanos.kouroupis"]
+description = "A UDP datagram library for Rust"
 
 [lib]
 name = "udp_polygon"
