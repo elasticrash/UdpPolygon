@@ -1,3 +1,0 @@
-[Config]
-bind_addresses = [["127.0.0.1", 5061]]
-destination_address = ["127.0.0.1", 5060]

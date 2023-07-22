@@ -5,15 +5,27 @@ use std::net::{IpAddr, Ipv4Addr};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
-    pub bind_addresses: Vec<(IpAddr, u16)>,
-    pub destination_address: Option<(IpAddr, u16)>,
+    pub bind_addresses: Vec<Address>,
+    pub destination_address: Option<Address>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct Address {
+    pub ip: IpAddr,
+    pub port: u16,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Config {
-            bind_addresses: vec![(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 5060)],
-            destination_address: Some((IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 5061)),
+            bind_addresses: vec![Address {
+                ip: IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)),
+                port: 5060,
+            }],
+            destination_address: Some(Address {
+                ip: IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
+                port: 5061,
+            }),
         }
     }
 }
@@ -23,7 +35,7 @@ pub trait FromToml {
 }
 
 pub trait FromArguments {
-    fn from_arguments(local: Vec<(IpAddr, u16)>, remote: Option<(IpAddr, u16)>) -> Self;
+    fn from_arguments(local: Vec<Address>, remote: Option<Address>) -> Self;
 }
 
 pub trait FromDefault {
@@ -50,7 +62,7 @@ impl FromToml for Config {
 /// FromArguments is used for when the user prefers to
 /// pass the addresses and ports via their own means
 impl FromArguments for Config {
-    fn from_arguments(local: Vec<(IpAddr, u16)>, remote: Option<(IpAddr, u16)>) -> Self {
+    fn from_arguments(local: Vec<Address>, remote: Option<Address>) -> Self {
         Config {
             bind_addresses: local,
             destination_address: remote,
@@ -109,9 +121,12 @@ impl FromEnv for Config {
         };
 
         Config {
-            bind_addresses: vec![(bind_address, bind_port)],
+            bind_addresses: vec![Address {
+                ip: bind_address,
+                port: bind_port,
+            }],
             destination_address: match (dest_address, dest_port) {
-                (Some(addr), Some(port)) => Some((addr, port)),
+                (Some(ip), Some(port)) => Some(Address { ip, port }),
                 _ => None,
             },
         }

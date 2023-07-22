@@ -3,7 +3,11 @@ name = "udp_polygon"
 version = "0.1.0"
 edition = "2021"
 readme = "README.md"
-
+documentation = "https://docs.rs/upd_polygon"
+license = "MIT"
+keywords = ["udp", "datagram"]
+repository = "https://github.com/elasticrash/udp_polygon"
+authors = ["stefanos.kouroupis"]
 
 [lib]
 name = "udp_polygon"

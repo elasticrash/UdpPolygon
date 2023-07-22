@@ -1,10 +1,16 @@
 extern crate udp_polygon;
 use std::net::{IpAddr, Ipv4Addr};
-use udp_polygon::{config::Config, config::FromArguments, Polygon};
+use udp_polygon::{config::Address, config::Config, config::FromArguments, Polygon};
 
 #[tokio::main]
 async fn main() {
-    let config = Config::from_arguments(vec![(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 5060)], None);
+    let config = Config::from_arguments(
+        vec![Address {
+            ip: IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)),
+            port: 5060,
+        }],
+        None,
+    );
     let mut polygon = Polygon::configure(config);
 
     let rx = polygon.receive();

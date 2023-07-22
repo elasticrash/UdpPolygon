@@ -1,0 +1,6 @@
+[[bind_addresses]]
+ip = "127.0.0.1"
+port = 5061
+[destination_address]
+ip = "127.0.0.1"
+port = 5060

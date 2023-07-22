@@ -31,6 +31,8 @@ export DEST_PORT=5060
 
 ## Examples
 
-At the moment there are only examples by passing arguments
+* send_fa (example by passing arguments)
+* receive_fa (example by passing arguments)
+* send_toml (example by using a toml file)
+* receive_toml (example by using a toml file)
 
-More examples comming soon

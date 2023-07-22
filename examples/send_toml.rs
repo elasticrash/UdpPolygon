@@ -1,8 +1,7 @@
 extern crate udp_polygon;
 use serde_derive::{Deserialize, Serialize};
-use std::net::{IpAddr, Ipv4Addr};
 use std::{thread, time};
-use udp_polygon::{config::Address, config::Config, config::FromArguments, Polygon};
+use udp_polygon::{config::Config, config::FromToml, Polygon};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Message {
@@ -11,16 +10,7 @@ pub struct Message {
 }
 
 fn main() {
-    let config = Config::from_arguments(
-        vec![Address {
-            ip: IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
-            port: 5061,
-        }],
-        Some(Address {
-            ip: IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
-            port: 5060,
-        }),
-    );
+    let config = Config::from_toml("config_send.toml".to_string());
 
     let mut polygon = Polygon::configure(config);
 

@@ -21,9 +21,9 @@ impl Polygon {
             .bind_addresses
             .to_vec()
             .into_iter()
-            .map(|addr| match addr.0 {
-                IpAddr::V4(ipv4) => SocketAddr::new(IpAddr::V4(ipv4), addr.1),
-                IpAddr::V6(ipv6) => SocketAddr::new(IpAddr::V6(ipv6), addr.1),
+            .map(|addr| match addr.ip {
+                IpAddr::V4(ipv4) => SocketAddr::new(IpAddr::V4(ipv4), addr.port),
+                IpAddr::V6(ipv6) => SocketAddr::new(IpAddr::V6(ipv6), addr.port),
             })
             .collect::<Vec<_>>();
 
@@ -33,9 +33,9 @@ impl Polygon {
             socket,
             buffer,
             destination: if let Some(addr) = config.destination_address {
-                match addr.0 {
-                    IpAddr::V4(ipv4) => Some(SocketAddr::new(IpAddr::V4(ipv4), addr.1)),
-                    IpAddr::V6(ipv6) => Some(SocketAddr::new(IpAddr::V6(ipv6), addr.1)),
+                match addr.ip {
+                    IpAddr::V4(ipv4) => Some(SocketAddr::new(IpAddr::V4(ipv4), addr.port)),
+                    IpAddr::V6(ipv6) => Some(SocketAddr::new(IpAddr::V6(ipv6), addr.port)),
                 }
             } else {
                 None
