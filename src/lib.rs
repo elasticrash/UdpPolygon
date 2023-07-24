@@ -50,9 +50,9 @@ impl Polygon {
             loop {
                 let maybe: Option<String>;
                 {
-                    let packets_queued = peek(&mut socket, &mut buffer);
+                    let packets_queued = UdpRead::peek(&mut socket, &mut buffer);
                     if packets_queued > 0 {
-                        maybe = match read(&mut socket, &mut buffer) {
+                        maybe = match UdpRead::read(&mut socket, &mut buffer) {
                             Ok(buf) => Some(buf),
                             Err(_) => None,
                         };
@@ -78,17 +78,21 @@ impl Polygon {
     }
 }
 
-fn peek(socket: &mut UdpSocket, buffer: &mut [u8; 65535]) -> usize {
-    match socket.peek(buffer) {
-        Ok(received) => received,
-        Err(_e) => 0,
-    }
-}
+struct UdpRead;
 
-fn read(socket: &mut UdpSocket, buffer: &mut [u8; 65535]) -> Result<String, String> {
-    let (amt, _src) = socket.recv_from(buffer).unwrap();
-    let slice = &mut buffer[..amt];
-    slice.to_vec();
-    let message = String::from_utf8_lossy(slice);
-    Ok(message.to_string())
+impl UdpRead {
+    fn peek(socket: &mut UdpSocket, buffer: &mut [u8; 65535]) -> usize {
+        match socket.peek(buffer) {
+            Ok(received) => received,
+            Err(_e) => 0,
+        }
+    }
+
+    fn read(socket: &mut UdpSocket, buffer: &mut [u8; 65535]) -> Result<String, String> {
+        let (amt, _src) = socket.recv_from(buffer).unwrap();
+        let slice = &mut buffer[..amt];
+        slice.to_vec();
+        let message = String::from_utf8_lossy(slice);
+        Ok(message.to_string())
+    }
 }

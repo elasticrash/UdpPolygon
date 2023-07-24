@@ -2,6 +2,11 @@
 
 An opiniated UDP listener and publisher
 
+## Requirements
+
+* the consumer requires tokio
+* a producer does not require anything extra  
+
 ## Configuration
 
 There are many ways to configure your UDP client and server
