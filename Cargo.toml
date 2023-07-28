@@ -10,9 +10,33 @@ repository = "https://github.com/elasticrash/udp_polygon"
 authors = ["stefanos.kouroupis"]
 description = "A UDP datagram library for Rust"
 
+[[example]]
+name = "send_with_timer"
+path = "./examples/send_with_timer.rs"
+required-features = ["timers"]
+
+[[example]]
+name = "send_fa"
+path = "./examples/send_fa.rs"
+
+[[example]]
+name = "send_toml"
+path = "./examples/send_toml.rs"
+
+[[example]]
+name = "receive_fa"
+path = "./examples/receive_fa.rs"
+
+[[example]]
+name = "receive_toml"
+path = "./examples/receive_toml.rs"
+
 [lib]
 name = "udp_polygon"
 path = "./src/lib.rs"
+
+[features]
+timers = []
 
 [dependencies]
 toml = "0.7"

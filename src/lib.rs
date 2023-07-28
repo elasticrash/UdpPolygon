@@ -2,13 +2,24 @@ use std::net::{IpAddr, SocketAddr, UdpSocket};
 pub mod config;
 use config::Config;
 use std::sync::mpsc::{self, Receiver, Sender};
+use std::sync::{Arc, Mutex};
 use tokio;
+
+#[cfg(feature = "timers")]
+pub mod timers;
+
+#[cfg(feature = "timers")]
+use crate::timers::Timers;
+
+#[cfg(feature = "timers")]
+use tokio::time::Duration;
 
 #[derive(Debug)]
 pub struct Polygon {
     pub socket: UdpSocket,
     pub buffer: [u8; 65535],
     pub destination: Option<SocketAddr>,
+    pub counter: Arc<Mutex<u32>>,
 }
 
 impl Polygon {
@@ -40,11 +51,13 @@ impl Polygon {
             } else {
                 None
             },
+            counter: Arc::new(Mutex::new(0)),
         }
     }
     pub fn receive(&mut self) -> Receiver<String> {
         let mut socket = self.socket.try_clone().unwrap();
         let mut buffer = self.buffer.clone();
+        let counter = self.counter.clone();
         let (tx, rx) = Polygon::get_channel();
         tokio::spawn(async move {
             loop {
@@ -58,6 +71,7 @@ impl Polygon {
                         };
 
                         if let Some(data) = maybe {
+                            *counter.lock().unwrap() += 1;
                             tx.send(data).unwrap();
                         }
                     }
@@ -66,6 +80,38 @@ impl Polygon {
         });
 
         rx
+    }
+    #[cfg(feature = "timers")]
+    pub fn send_with_timer(&mut self, data: String, timers: Timers) {
+        let socket = self.socket.try_clone().unwrap();
+        let destination = self.destination.clone().unwrap();
+        let counter = self.counter.clone();
+        tokio::spawn(async move {
+            let receive_counter = *counter.lock().unwrap();
+            let mut current_timer = timers.frequency.into_iter();
+            loop {
+                println!("sending on the loop");
+                println!("counter: {}", *counter.lock().unwrap());
+                if receive_counter != *counter.lock().unwrap() {
+                    break;
+                }
+                let next_timer = match current_timer.next() {
+                    Some(timer) => timer,
+                    None => {
+                        break;
+                    }
+                };
+
+                println!("next_timer: {}", next_timer);
+                socket
+                    .send_to(
+                        data.as_bytes(),
+                        format!("{}:{}", &destination.ip(), &destination.port()),
+                    )
+                    .unwrap();
+                tokio::time::sleep(Duration::from_millis(next_timer)).await;
+            }
+        });
     }
     pub fn send(&mut self, data: String) {
         let destination = self.destination.clone().unwrap();
