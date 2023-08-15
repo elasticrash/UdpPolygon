@@ -1,3 +1,3 @@
 pub struct Timers {
-    pub frequency: Vec<u64>,
+    pub intervals: Vec<u64>,
 }

@@ -57,7 +57,7 @@ impl Polygon {
     pub fn receive(&mut self) -> Receiver<String> {
         let mut socket = self.socket.try_clone().unwrap();
         let mut buffer = self.buffer.clone();
-        let counter = self.counter.clone();
+        let counter = Arc::clone(&self.counter);
         let (tx, rx) = Polygon::get_channel();
         tokio::spawn(async move {
             loop {
@@ -72,7 +72,13 @@ impl Polygon {
 
                         if let Some(data) = maybe {
                             *counter.lock().unwrap() += 1;
-                            tx.send(data).unwrap();
+
+                            match tx.send(data) {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    println!("receiver error: {:?}", e.to_string())
+                                }
+                            }
                         }
                     }
                 }
@@ -85,14 +91,13 @@ impl Polygon {
     pub fn send_with_timer(&mut self, data: String, timers: Timers) {
         let socket = self.socket.try_clone().unwrap();
         let destination = self.destination.clone().unwrap();
-        let counter = self.counter.clone();
+        let counter = Arc::clone(&self.counter);
         tokio::spawn(async move {
             let receive_counter = *counter.lock().unwrap();
-            let mut current_timer = timers.frequency.into_iter();
+            let mut current_timer = timers.intervals.into_iter();
             loop {
-                println!("sending on the loop");
-                println!("counter: {}", *counter.lock().unwrap());
                 if receive_counter != *counter.lock().unwrap() {
+                    *counter.lock().unwrap() = 0;
                     break;
                 }
                 let next_timer = match current_timer.next() {
@@ -102,7 +107,6 @@ impl Polygon {
                     }
                 };
 
-                println!("next_timer: {}", next_timer);
                 socket
                     .send_to(
                         data.as_bytes(),

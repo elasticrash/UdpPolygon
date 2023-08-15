@@ -34,10 +34,15 @@ export DEST_PORT=5060
  let config = Config::from_env();
 ```
 
-## Examples
+## Basic Examples
 
 * send_fa (example by passing arguments)
 * receive_fa (example by passing arguments)
 * send_toml (example by using a toml file)
 * receive_toml (example by using a toml file)
+
+## Timer flag
+
+Retransmit a message until there is a response
+
 

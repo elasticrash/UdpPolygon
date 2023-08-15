@@ -26,7 +26,13 @@ async fn main() {
 
     let mut polygon = Polygon::configure(config);
 
-    println!("sending");
+    // it is important to assign the receiver to a variable
+    // else the receiver will be dropped and the thread will
+    // not be able to receive any messages
+    // and send with timer will not work, at it needs
+    // the receiver to be alive
+    let _rx = polygon.receive();
+
     polygon.send_with_timer(
         serde_json::to_string(&Message {
             id: 1,
@@ -34,7 +40,7 @@ async fn main() {
         })
         .unwrap(),
         Timers {
-            frequency: vec![500, 1000, 1500],
+            intervals: vec![500, 600, 1000, 1500],
         },
     );
 
