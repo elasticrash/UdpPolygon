@@ -3,12 +3,15 @@ use std::env;
 use std::fs;
 use std::net::{IpAddr, Ipv4Addr};
 
+/// Config holds the configuration for local and remote UDP addresses
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
     pub bind_addresses: Vec<Address>,
     pub destination_address: Option<Address>,
 }
 
+/// Address is a struct that holds an IP address and a port
+/// It is used to configure the local and remote addresses for UDP
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Address {
     pub ip: IpAddr,
@@ -30,24 +33,42 @@ impl Default for Config {
     }
 }
 
+/// Configuration through TOML
 pub trait FromToml {
     fn from_toml(filename: String) -> Self;
 }
 
+/// Configuration through arguments
 pub trait FromArguments {
     fn from_arguments(local: Vec<Address>, remote: Option<Address>) -> Self;
 }
 
+/// Default configuration
 pub trait FromDefault {
     fn from_default() -> Self;
 }
 
+/// Configuration through environment variables
 pub trait FromEnv {
     fn from_env() -> Self;
 }
 
+/// ## Info
 /// FromToml is used when the user wants to specify
 /// the addresses and ports via a config file
+///
+/// ## Example
+/// ``` Toml
+/// [[bind_addresses]]
+/// ip = "127.0.0.1"
+/// port = 5061
+/// [destination_address]
+/// ip = "127.0.0.1"
+/// port = 5060
+/// ```
+/// ``` rust
+/// let config = Config::from_toml("config.toml".to_string());
+/// ```
 impl FromToml for Config {
     fn from_toml(filename: String) -> Self {
         let contents = fs::read_to_string(filename);
@@ -59,8 +80,17 @@ impl FromToml for Config {
     }
 }
 
+/// ## Info
 /// FromArguments is used for when the user prefers to
 /// pass the addresses and ports via their own means
+///
+/// ## Example
+/// ``` rust
+/// let config = Config::from_arguments(
+///        vec![(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 5061)],
+///        Some((IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 5060)),
+///    );
+/// ```
 impl FromArguments for Config {
     fn from_arguments(local: Vec<Address>, remote: Option<Address>) -> Self {
         Config {
@@ -71,20 +101,28 @@ impl FromArguments for Config {
 }
 
 /// FromDefault is used when no config file is specified
-/// for the time I using 5060/5061 as the default ports
+///
+///for the time I using 5060/5061 as the default ports
 impl FromDefault for Config {
     fn from_default() -> Self {
         Config::default()
     }
 }
 
+/// ## Info
 /// FromEnv only supports a single address/port pair
 /// for both the local and remote addresses
+///
 /// THE ENVIRONMENT VARIABLES ARE:
-/// BIND_ADDRS: the local address to bind to
-/// BIND_PORT: the local port to bind to
-/// DEST_ADDRS: the remote address to send to
-/// DEST_PORT: the remote port to send to
+/// * BIND_ADDRS: the local address to bind to
+/// * BIND_PORT: the local port to bind to
+/// * DEST_ADDRS: the remote address to send to
+/// * DEST_PORT: the remote port to send to
+///
+/// ## Example
+///``` rust
+/// let config = Config::from_env();
+/// ```
 impl FromEnv for Config {
     fn from_env() -> Self {
         println!("BIND_ADDRS: {:?}", env::var("BIND_ADDRS"));
