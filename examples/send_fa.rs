@@ -25,7 +25,7 @@ fn main() {
     let mut polygon = Polygon::configure(config);
 
     loop {
-        println!("sending");
+        println!("sending message...");
         polygon.send(
             serde_json::to_string(&Message {
                 id: 1,

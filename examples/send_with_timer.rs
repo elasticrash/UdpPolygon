@@ -1,6 +1,7 @@
 extern crate udp_polygon;
 use serde_derive::{Deserialize, Serialize};
 use std::net::{IpAddr, Ipv4Addr};
+use std::sync::Arc;
 use std::{thread, time};
 use udp_polygon::timers::Timers;
 use udp_polygon::{config::Address, config::Config, config::FromArguments, Polygon};
@@ -26,21 +27,26 @@ async fn main() {
 
     let mut polygon = Polygon::configure(config);
 
-    // it is important to assign the receiver to a variable
-    // else the receiver will be dropped and the thread will
-    // not be able to receive any messages
-    // and send with timer will not work, at it needs
-    // the receiver to be alive
-    let _rx = polygon.receive();
+    let rx = polygon.receive();
+    let pause = Arc::clone(&polygon.pause_timer_send);
 
+    tokio::spawn(async move {
+        let mut counter = 0;
+        loop {
+            let msg = rx.recv().unwrap();
+            println!("Received: {}", msg);
+            counter += 1;
+            if counter == 2 {
+                *pause.lock().unwrap() = true;
+            }
+        }
+    });
+
+    println!("Sending message...");
     polygon.send_with_timer(
-        serde_json::to_string(&Message {
-            id: 1,
-            msg: String::from("Hello with timers!"),
-        })
-        .unwrap(),
+        "Hello World".to_string(),
         Timers {
-            intervals: vec![500, 600, 1000, 1500],
+            delays: vec![500, 600, 1000, 1500],
         },
     );
 

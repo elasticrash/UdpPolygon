@@ -18,7 +18,7 @@ async fn main() {
     loop {
         let maybe = rx.try_recv();
         if let Ok(data) = maybe {
-            println!("data {data:?}");
+            println!("receiving... {data:?}");
         }
     }
 }

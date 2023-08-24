@@ -1,7 +1,6 @@
 extern crate udp_polygon;
 use serde_derive::{Deserialize, Serialize};
 use std::net::{IpAddr, Ipv4Addr};
-use std::{thread, time};
 use udp_polygon::{config::Address, config::Config, config::FromArguments, Polygon};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -25,23 +24,18 @@ async fn main() {
     let mut polygon = Polygon::configure(config);
 
     let rx = polygon.receive();
-    let delay = time::Duration::from_millis(800);
 
-    let mut counter = 0;
     loop {
         let maybe = rx.try_recv();
-        if let Ok(_data) = maybe {
-            counter += 1;
-            thread::sleep(delay);
-            if counter % 2 == 0 {
-                polygon.send(
-                    serde_json::to_string(&Message {
-                        id: 1,
-                        msg: String::from("Cancel Timer!"),
-                    })
-                    .unwrap(),
-                );
-            }
+        if let Ok(data) = maybe {
+            println!("receiving... {data:?}");
+            polygon.send(
+                serde_json::to_string(&Message {
+                    id: 1,
+                    msg: String::from("Hello there!!!"),
+                })
+                .unwrap(),
+            );
         }
     }
 }

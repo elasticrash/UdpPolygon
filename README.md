@@ -5,23 +5,32 @@ An opiniated UDP listener and publisher
 ## Requirements
 
 * the consumer requires tokio
-* a producer does not require anything extra  
+* a producer does not require anything extra
+* a producer with the timer flag enabled requires tokio
 
 ## Configuration
 
-There are many ways to configure your UDP client and server
+There are many options on configuring your UDP client and server
 
-* From a TOML file
-* By passing arguments
+* TOML file
+``` Toml
+[[bind_addresses]]
+ip = "127.0.0.1"
+port = 5061
+[destination_address]
+ip = "127.0.0.1"
+port = 5060
+```
+* Arguments
 
-``` Rust
+``` rust
  let config = Config::from_arguments(
         vec![(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 5061)],
         Some((IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 5060)),
     );
 ```
 
-* From enviroment variables
+* Enviroment variables
 
 ``` bash 
 export BIND_ADDRS=127.0.0.1
@@ -34,6 +43,25 @@ export DEST_PORT=5060
  let config = Config::from_env();
 ```
 
+## Send
+
+``` rust 
+    polygon.send("Hello World".to_string());
+``` 
+
+## Receive
+
+``` rust
+    let rx = polygon.receive();
+ 
+    loop {
+        let maybe = rx.try_recv();
+        if let Ok(data) = maybe {
+            println!("receiving... {data:?}");
+        }
+    }
+```
+
 ## Basic Examples
 
 * send_fa (example by passing arguments)
@@ -43,6 +71,38 @@ export DEST_PORT=5060
 
 ## Timer flag
 
-Retransmit a message until there is a response
+Retransmits a message with specific delays 
+
+``` rust
+  polygon.send_with_timer(
+        "Hello World".to_string(),
+        Timers {
+            delays: vec![500, 600, 1000, 1500],
+        },
+    );
+
+```
+
+retransmissions can be paused at any given time, even mid sending a message, effectively cancelling a retransmission
+
+``` rust
+    let mut polygon = Polygon::configure(config);
+    let pause = Arc::clone(&polygon.pause_timer_send);
+    *pause.lock().unwrap() = true;
+```
+or 
+``` rust
+    let mut polygon = Polygon::configure(config);
+    polygon.pause_timer_send()
+    polygon.resume_timer_send()
+```
+this will make the send_with_timer to behave like a normal send (only it would still require tokio)
+
+## Timer Examples
+* send_with_timer
+
+
+
+
 
 
