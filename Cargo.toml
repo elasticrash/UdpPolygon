@@ -1,6 +1,6 @@
 [package]
 name = "udp_polygon"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 readme = "README.md"
 documentation = "https://docs.rs/upd_polygon"
@@ -12,7 +12,7 @@ description = "A UDP datagram library for Rust"
 
 [[example]]
 name = "send_with_timer"
-path = "./examples/send_with_timer.rs"
+path = "./examples/send_receive_with_timer.rs"
 required-features = ["timers"]
 
 [[example]]
@@ -32,8 +32,8 @@ name = "receive_toml"
 path = "./examples/receive_toml.rs"
 
 [[example]]
-name = "receive_reply"
-path = "./examples/receive_reply.rs"
+name = "send_receive"
+path = "./examples/send_receive.rs"
 
 [lib]
 name = "udp_polygon"

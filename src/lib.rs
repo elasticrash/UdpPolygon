@@ -117,7 +117,7 @@ impl Polygon {
         *self.pause_timer_send.lock().unwrap() = true;
     }
     #[cfg(feature = "timers")]
-    pub fn send_with_timer(&mut self, data: String, timers: Timers) {
+    pub fn send_with_timer(&mut self, data: Vec<u8>, timers: Timers) {
         let socket = self.socket.try_clone().unwrap();
         let destination = self.destination.clone().unwrap();
         let pause = Arc::clone(&self.pause_timer_send);
@@ -137,7 +137,7 @@ impl Polygon {
 
                 socket
                     .send_to(
-                        data.as_bytes(),
+                        &data,
                         format!("{}:{}", &destination.ip(), &destination.port()),
                     )
                     .unwrap();
@@ -146,11 +146,11 @@ impl Polygon {
             }
         });
     }
-    pub fn send(&mut self, data: String) {
+    pub fn send(&mut self, data: Vec<u8>) {
         let destination = self.destination.unwrap();
         self.socket
             .send_to(
-                data.as_bytes(),
+                &data,
                 format!("{}:{}", &destination.ip(), &destination.port()),
             )
             .unwrap();

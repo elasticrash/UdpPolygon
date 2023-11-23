@@ -5,6 +5,7 @@ An opiniated UDP listener and publisher
 ## Breaking Changes
 From 0.1.1 to 0.2.0
 Previously, versions below 0.1.1 were converting the received datagram bytes into a string. However, starting from version 0.2.0 and onwards, the receive event now delivers the bytes directly.
+Additionally, the expected format for sending data now requires it to be encapsulated within a Vec<u8> for compatibility.
 The change was implemented because the previous implementation was found to be too restrictive.
 
 ## Requirements
@@ -51,7 +52,7 @@ export DEST_PORT=5060
 ## Send
 
 ``` rust 
-    polygon.send("Hello World".to_string());
+    polygon.send("Hello World".as_bytes().to_vec());
 ``` 
 
 ## Receive
@@ -73,6 +74,7 @@ export DEST_PORT=5060
 * receive_fa (example by passing arguments)
 * send_toml (example by using a toml file)
 * receive_toml (example by using a toml file)
+* send_receive (both sending and receiving)
 
 ## Timer flag
 
@@ -80,7 +82,7 @@ Retransmits a message with specific delays
 
 ``` rust
   polygon.send_with_timer(
-        "Hello World".to_string(),
+        "Hello World".as_bytes().to_vec(),
         Timers {
             delays: vec![500, 600, 1000, 1500],
         },
@@ -104,7 +106,7 @@ or
 this will make the send_with_timer to behave like a normal send (only it would still require tokio)
 
 ## Timer Examples
-* send_with_timer
+* send_receive_with_timer
 
 
 

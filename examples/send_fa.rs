@@ -31,7 +31,8 @@ fn main() {
                 id: 1,
                 msg: String::from("Hello"),
             })
-            .unwrap(),
+            .unwrap()
+            .into(),
         );
         thread::sleep(time::Duration::from_secs(2));
     }

@@ -44,7 +44,7 @@ async fn main() {
 
     println!("Sending message...");
     polygon.send_with_timer(
-        "Hello World".to_string(),
+        "Hello World".as_bytes().to_vec(),
         Timers {
             delays: vec![500, 600, 1000, 1500],
         },
