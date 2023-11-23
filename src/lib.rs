@@ -42,7 +42,7 @@ pub struct Polygon {
 }
 
 impl Polygon {
-    pub fn get_channel() -> (Sender<String>, Receiver<String>) {
+    pub fn get_channel() -> (Sender<Vec<u8>>, Receiver<Vec<u8>>) {
         let (tx, rx) = mpsc::channel();
         (tx, rx)
     }
@@ -56,7 +56,11 @@ impl Polygon {
             })
             .collect::<Vec<_>>();
 
-        let socket = UdpSocket::bind(&addrs[..]).unwrap();
+        let socket = match UdpSocket::bind(&addrs[..]) {
+            Ok(socket) => socket,
+            Err(e) => panic!("couldn't bind socket: {:?}", e),
+        };
+
         let buffer = [0_u8; 65535];
         Self {
             socket,
@@ -72,17 +76,18 @@ impl Polygon {
             pause_timer_send: Arc::new(Mutex::new(false)),
         }
     }
-    pub fn receive(&mut self) -> Receiver<String> {
+    pub fn receive(&mut self) -> Receiver<Vec<u8>> {
         let mut socket = self.socket.try_clone().unwrap();
         let mut buffer = self.buffer;
-        let (tx, rx) = Polygon::get_channel();
+        let (tx, rx) = Self::get_channel();
+
         tokio::spawn(async move {
             loop {
-                let maybe: Option<String>;
+                let maybe: Option<Vec<u8>>;
                 {
                     let packets_queued = UdpRead::peek(&mut socket, &mut buffer);
                     if packets_queued > 0 {
-                        maybe = match UdpRead::read(&mut socket, &mut buffer) {
+                        maybe = match UdpRead::read_bytes(&mut socket, &mut buffer) {
                             Ok(buf) => Some(buf),
                             Err(_) => None,
                         };
@@ -102,6 +107,7 @@ impl Polygon {
 
         rx
     }
+
     #[cfg(feature = "timers")]
     pub fn resume_timer_send(&mut self) {
         *self.pause_timer_send.lock().unwrap() = false;
@@ -161,11 +167,9 @@ impl UdpRead {
         }
     }
 
-    fn read(socket: &mut UdpSocket, buffer: &mut [u8; 65535]) -> Result<String, String> {
+    fn read_bytes(socket: &mut UdpSocket, buffer: &mut [u8; 65535]) -> Result<Vec<u8>, String> {
         let (amt, _src) = socket.recv_from(buffer).unwrap();
         let slice = &mut buffer[..amt];
-        slice.to_vec();
-        let message = String::from_utf8_lossy(slice);
-        Ok(message.to_string())
+        Ok(slice.to_vec())
     }
 }

@@ -2,6 +2,11 @@
 
 An opiniated UDP listener and publisher
 
+## Breaking Changes
+From 0.1.1 to 0.2.0
+Previously, versions below 0.1.1 were converting the received datagram bytes into a string. However, starting from version 0.2.0 and onwards, the receive event now delivers the bytes directly.
+The change was implemented because the previous implementation was found to be too restrictive.
+
 ## Requirements
 
 * the consumer requires tokio

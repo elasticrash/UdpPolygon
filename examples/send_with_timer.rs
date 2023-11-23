@@ -17,7 +17,7 @@ async fn main() {
     let config = Config::from_arguments(
         vec![Address {
             ip: IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
-            port: 5061,
+            port: 5060,
         }],
         Some(Address {
             ip: IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
@@ -34,7 +34,7 @@ async fn main() {
         let mut counter = 0;
         loop {
             let msg = rx.recv().unwrap();
-            println!("Received: {}", msg);
+            println!("Received: {:?}", msg);
             counter += 1;
             if counter == 2 {
                 *pause.lock().unwrap() = true;

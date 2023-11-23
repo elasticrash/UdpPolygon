@@ -1,6 +1,6 @@
 [package]
 name = "udp_polygon"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 readme = "README.md"
 documentation = "https://docs.rs/upd_polygon"
@@ -30,10 +30,6 @@ path = "./examples/receive_fa.rs"
 [[example]]
 name = "receive_toml"
 path = "./examples/receive_toml.rs"
-
-[[example]]
-name = "receive_with_timer"
-path = "./examples/receive_with_timer.rs"
 
 [[example]]
 name = "receive_reply"
