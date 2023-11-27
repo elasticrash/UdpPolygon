@@ -155,6 +155,9 @@ impl Polygon {
             )
             .unwrap();
     }
+    pub fn change_destination(&mut self, new_destination: SocketAddr) {
+        self.destination = Some(new_destination);
+    }
 }
 
 struct UdpRead;
